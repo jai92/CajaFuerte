@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<title>Mi Caja Fuerte</title>
+<style>
+:root{
+  --bg:#f3f5f4;--card:#fff;--tx:#14201d;--tx2:#5d6b67;--line:#e3e8e6;
+  --pri:#0f766e;--pri2:#e6f3f1;--ok:#15803d;--okb:#e7f6ec;--soon:#a16207;--soonb:#fdf6e3;
+  --warn:#c2410c;--warnb:#fdeee5;--bad:#b91c1c;--badb:#fde8e8;--sh:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0e1513;--card:#17201e;--tx:#e8efed;--tx2:#97a6a2;--line:#26322f;
+  --pri:#2dd4bf;--pri2:#123a35;--ok:#4ade80;--okb:#14301f;--soon:#facc15;--soonb:#33290c;
+  --warn:#fb923c;--warnb:#3a2112;--bad:#f87171;--badb:#3b1515;--sh:none;}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px}
+body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+button,input,select,textarea{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:5;background:var(--pri);color:#fff;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;display:flex;align-items:center;gap:10px}
+@media (prefers-color-scheme:dark){header{background:#0b3d38}}
+header h1{font-size:19px;margin:0;flex:1;font-weight:650;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbtn{background:rgba(255,255,255,.15);border:0;color:#fff;width:38px;height:38px;border-radius:12px;font-size:18px;display:grid;place-items:center}
+main{padding:14px;max-width:720px;margin:0 auto}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border-radius:16px;padding:14px;box-shadow:var(--sh);border:1px solid var(--line)}
+.stat b{display:block;font-size:22px;margin:4px 0 2px}
+.stat small{color:var(--tx2);font-size:12.5px}
+.stat .lbl{font-size:13px;color:var(--tx2);display:flex;gap:6px;align-items:center}
+h2{font-size:14px;text-transform:uppercase;letter-spacing:.6px;color:var(--tx2);margin:20px 4px 8px;font-weight:650}
+.list{background:var(--card);border-radius:16px;overflow:hidden;box-shadow:var(--sh);border:1px solid var(--line)}
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+.row:last-child{border-bottom:0}
+.row:active{background:var(--pri2)}
+.ic{width:42px;height:42px;border-radius:12px;background:var(--pri2);display:grid;place-items:center;font-size:21px;flex:none;overflow:hidden}
+.ic img{width:100%;height:100%;object-fit:cover}
+.mid{flex:1;min-width:0}
+.mid .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mid .s{font-size:13px;color:var(--tx2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.end{text-align:right;flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.end small{font-size:12px;color:var(--tx2)}
+.chip{font-size:12px;font-weight:650;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.chip.ok{background:var(--okb);color:var(--ok)}.chip.soon{background:var(--soonb);color:var(--soon)}
+.chip.warn{background:var(--warnb);color:var(--warn)}.chip.bad{background:var(--badb);color:var(--bad)}
+.chip.off{background:var(--line);color:var(--tx2)}
+.qbtn{border:1px solid var(--pri);background:transparent;color:var(--pri);border-radius:10px;padding:5px 10px;font-size:13px;font-weight:600}
+.search{width:100%;padding:11px 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);margin-bottom:12px;outline:none}
+.search:focus{border-color:var(--pri)}
+.empty{text-align:center;padding:34px 20px;color:var(--tx2);background:var(--card);border-radius:16px;border:1px dashed var(--line)}
+.empty .big{font-size:42px;margin-bottom:8px}
+.empty p{margin:6px 0 14px;line-height:1.45}
+.btn{border:0;background:var(--pri);color:#fff;border-radius:12px;padding:12px 16px;font-weight:650;font-size:15px}
+@media (prefers-color-scheme:dark){.btn{color:#062a26}}
+.btn.sec{background:var(--pri2);color:var(--pri)}
+.btn.danger{background:var(--badb);color:var(--bad)}
+.btn.full{width:100%}
+.summary{background:linear-gradient(135deg,var(--pri),#115e59);color:#fff;border-radius:18px;padding:16px;margin-bottom:14px;display:flex;justify-content:space-between;gap:10px}
+.summary div small{opacity:.85;font-size:13px}.summary div b{display:block;font-size:24px;margin-top:2px}
+@media (prefers-color-scheme:dark){.summary{background:linear-gradient(135deg,#115e59,#0b3d38)}}
+.members{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.mcard{background:var(--card);border:1px solid var(--line);box-shadow:var(--sh);border-radius:16px;padding:14px;cursor:pointer;text-align:center}
+.mcard .em{font-size:38px}.mcard .n{font-weight:650;margin-top:6px}.mcard .s{font-size:12.5px;color:var(--tx2);margin-top:3px}
+.mhead{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center;box-shadow:var(--sh)}
+.mhead .em{font-size:46px}.mhead .n{font-size:20px;font-weight:700}.mhead .s{color:var(--tx2);font-size:14px;margin-top:2px}
+.notes{white-space:pre-wrap;font-size:14px;color:var(--tx2);margin-top:10px;background:var(--bg);border-radius:10px;padding:10px}
+.sechead{display:flex;align-items:center;justify-content:space-between;margin:20px 4px 8px}
+.sechead h2{margin:0}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:6;background:var(--card);border-top:1px solid var(--line);display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+nav button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--tx2);padding:4px 0;border-radius:12px}
+nav button span{font-size:21px;line-height:1.2;filter:grayscale(1);opacity:.7}
+nav button.on{color:var(--pri);font-weight:650}
+nav button.on span{filter:none;opacity:1}
+.fab{position:fixed;right:18px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:6;width:58px;height:58px;border-radius:18px;border:0;background:var(--pri);color:#fff;font-size:30px;box-shadow:0 6px 18px rgba(15,118,110,.4);display:grid;place-items:center}
+@media (prefers-color-scheme:dark){.fab{color:#062a26}}
+.ov{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;animation:fd .15s}
+@keyframes fd{from{opacity:0}}
+.sheet{background:var(--card);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));animation:up .2s ease-out}
+@keyframes up{from{transform:translateY(40px)}}
+.sheet h3{margin:0 0 14px;font-size:19px;display:flex;align-items:center;justify-content:space-between}
+.x{border:0;background:var(--bg);width:34px;height:34px;border-radius:10px;font-size:16px}
+.fld{margin-bottom:13px}
+.fld label{display:block;font-size:13px;font-weight:600;color:var(--tx2);margin-bottom:5px}
+.fld input:not([type=checkbox]),.fld select,.fld textarea{width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);outline:none;min-height:44px}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--pri)}
+.fld textarea{min-height:76px;resize:vertical}
+.chk{display:flex;align-items:center;gap:10px;font-weight:600}
+.chk input{width:22px;height:22px;accent-color:var(--pri)}
+.photos{display:flex;gap:8px;flex-wrap:wrap}
+.ph{width:76px;height:76px;border-radius:12px;overflow:hidden;position:relative;background:var(--bg);border:1px solid var(--line)}
+.ph img{width:100%;height:100%;object-fit:cover}
+.ph button{position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:8px;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:12px}
+.addph{width:76px;height:76px;border-radius:12px;border:2px dashed var(--line);background:none;color:var(--tx2);font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.addph span{font-size:24px}
+.acts{display:flex;gap:10px;margin-top:18px}.acts .btn{flex:1}
+.choose{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.choose button{border:1px solid var(--line);background:var(--bg);border-radius:16px;padding:16px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:600;font-size:14px}
+.choose button span{font-size:28px}
+.viewer{position:fixed;inset:0;z-index:40;background:#000;display:flex;align-items:center;justify-content:center}
+.viewer img{max-width:100%;max-height:100%;object-fit:contain}
+.viewer button{position:absolute;top:calc(14px + env(safe-area-inset-top));right:14px;width:42px;height:42px;border-radius:14px;border:0;background:rgba(255,255,255,.2);color:#fff;font-size:18px}
+.toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#1f2a28;color:#fff;padding:11px 18px;border-radius:14px;z-index:50;font-size:14px;max-width:88vw;text-align:center;animation:fd .2s}
+.set-g{background:var(--bg);border-radius:14px;padding:12px;margin-bottom:12px}
+.set-g .fld:last-child{margin-bottom:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.info{font-size:13.5px;color:var(--tx2);line-height:1.5;margin:4px 2px 14px}
+details summary{cursor:pointer;color:var(--tx2);font-size:14px;margin:14px 4px 8px;font-weight:600}
+</style>
+</head>
+<body>
+<header>
+  <button class="hbtn" id="backBtn" style="display:none" aria-label="Atrás">←</button>
+  <h1 id="title">Mi Caja Fuerte</h1>
+  <button class="hbtn" id="setBtn" aria-label="Ajustes">⚙️</button>
+</header>
+<main id="main"></main>
+<button class="fab" id="fab" aria-label="Añadir">+</button>
+<nav id="nav">
+  <button data-t="inicio"><span>🏠</span>Inicio</button>
+  <button data-t="garantias"><span>🧾</span>Garantías</button>
+  <button data-t="vencimientos"><span>📅</span>Vencimientos</button>
+  <button data-t="suscripciones"><span>💳</span>Suscripciones</button>
+  <button data-t="familia"><span>👨‍👩‍👧</span>Familia</button>
+</nav>
+
+<datalist id="sugVen"><option>DNI</option><option>Pasaporte</option><option>Carnet de conducir</option><option>ITV</option><option>Seguro del coche</option><option>Seguro de casa</option><option>Seguro de vida</option><option>Revisión de la caldera</option><option>Revisión del gas</option><option>Impuesto de circulación</option><option>IBI</option><option>Tarjeta sanitaria</option><option>Tarjeta de transporte</option><option>Contrato de alquiler</option><option>Extintor</option></datalist>
+<datalist id="sugSus"><option>Netflix</option><option>Spotify</option><option>Amazon Prime</option><option>Disney+</option><option>Max</option><option>YouTube Premium</option><option>Apple Music</option><option>iCloud</option><option>Google One</option><option>Movistar+</option><option>DAZN</option><option>Xbox Game Pass</option><option>PlayStation Plus</option><option>Gimnasio</option><option>Fibra y móvil</option></datalist>
+<datalist id="sugVac"><option>Hexavalente</option><option>Neumococo</option><option>Meningococo B</option><option>Meningococo C</option><option>Meningococo ACWY</option><option>Triple vírica</option><option>Varicela</option><option>Rotavirus</option><option>Gripe</option><option>VPH</option><option>Tétanos-difteria</option><option>Rabia</option><option>Polivalente (perro)</option><option>Trivalente felina</option><option>Leucemia felina</option><option>Leishmaniosis</option><option>Desparasitación interna</option><option>Desparasitación externa</option><option>Pipeta antiparasitaria</option><option>Collar antiparasitario</option></datalist>
+<datalist id="sugProf"><option>Pediatra</option><option>Médico de cabecera</option><option>Enfermería</option><option>Dentista</option><option>Oftalmólogo</option><option>Especialista</option><option>Veterinario</option><option>Peluquería canina</option></datalist>
+
+<script>
+'use strict';
+/* ============ Utilidades ============ */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const pad = n => String(n).padStart(2, '0');
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const pd = s => { if (!s) return null; const [y, m, d] = String(s).split('-').map(Number); if (!y || !m || !d) return null; return new Date(y, m - 1, d); };
+const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+const addD = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
+const addM = (d, n) => { const r = new Date(d.getFullYear(), d.getMonth() + n, 1); const last = new Date(r.getFullYear(), r.getMonth() + 1, 0).getDate(); r.setDate(Math.min(d.getDate(), last)); return r; };
+const diasHasta = d => Math.round((d - today()) / 864e5);
+const fmt = d => d ? d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+const fmtC = d => d ? d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) : '—';
+const eur = n => (+n || 0).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+
+function toast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
+}
+
+/* ============ Capacitor (nativo) ============ */
+const CAP = window.Capacitor;
+const isNative = !!(CAP && CAP.isNativePlatform && CAP.isNativePlatform());
+const Plug = n => (isNative && CAP.Plugins) ? CAP.Plugins[n] : null;
+
+/* ============ Ajustes ============ */
+const DEF_SET = { hora: '10:00', avisoGar: 30, avisoVen: 30, avisoSus: 3, avisoVac: 7 };
+let SET = { ...DEF_SET };
+try { Object.assign(SET, JSON.parse(localStorage.getItem('mcf_set') || '{}')); } catch (e) {}
+const saveSet = () => { try { localStorage.setItem('mcf_set', JSON.stringify(SET)); } catch (e) {} };
+
+/* ============ Base de datos (IndexedDB, todo en el móvil) ============ */
+let db, ITEMS = [];
+function openDB() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('micajafuerte', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('items', { keyPath: 'id' });
+    r.onsuccess = () => { db = r.result; res(); };
+    r.onerror = () => rej(r.error);
+  });
+}
+const store = mode => db.transaction('items', mode).objectStore('items');
+const req = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+const dbAll = () => req(store('readonly').getAll());
+const dbPut = o => req(store('readwrite').put(o));
+const dbDel = id => req(store('readwrite').delete(id));
+const dbClear = () => req(store('readwrite').clear());
+async function reload() { ITEMS = await dbAll(); render(); scheduleAll(); }
+const byType = t => ITEMS.filter(x => x.type === t);
+const getItem = id => ITEMS.find(x => x.id === id);
+
+/* ============ Lógica de fechas ============ */
+const CATS = ['Documento', 'Vehículo', 'Casa', 'Seguro', 'Salud', 'Mascota', 'Otros'];
+const CAT_ICON = { Documento: '🪪', 'Vehículo': '🚗', Casa: '🏠', Seguro: '🛡️', Salud: '❤️', Mascota: '🐾', Otros: '📌' };
+const PER = {
+  semanal: { d: 7, f: 52 / 12, l: 'semana' }, mensual: { m: 1, f: 1, l: 'mes' },
+  trimestral: { m: 3, f: 1 / 3, l: 'trimestre' }, semestral: { m: 6, f: 1 / 6, l: 'semestre' }, anual: { m: 12, f: 1 / 12, l: 'año' }
+};
+const REP_TXT = { 1: 'cada mes', 3: 'cada 3 meses', 6: 'cada 6 meses', 12: 'cada año', 24: 'cada 2 años', 36: 'cada 3 años', 60: 'cada 5 años', 120: 'cada 10 años' };
+
+const finGarantia = g => { const c = pd(g.fechaCompra); return c ? addM(c, Math.round(12 * (+g.anios || 0))) : null; };
+function cobros(s, hasta) {
+  const b = pd(s.proxima); if (!b) return [];
+  const P = PER[s.periodo] || PER.mensual, out = [], t = today();
+  for (let k = 0; k < 5000; k++) {
+    const d = P.d ? addD(b, P.d * k) : addM(b, P.m * k);
+    if (d > hasta) break; if (d >= t) out.push(d);
+  }
+  return out;
+}
+const proxCobro = s => cobros(s, addD(today(), 800))[0] || null;
+const mensual = s => (+s.precio || 0) * (PER[s.periodo] || PER.mensual).f;
+const miembroNombre = id => (getItem(id) || {}).nombre || '';
+const esMascota = id => (getItem(id) || {}).tipo === 'mascota';
+function emojiMiembro(m) {
+  if (!m) return '🙂';
+  if (m.tipo === 'mascota') {
+    const e = (m.especie || '').toLowerCase();
+    if (/gat/.test(e)) return '🐱'; if (/conej/.test(e)) return '🐰'; if (/p[aá]jar|ave|loro|periquito/.test(e)) return '🐦';
+    if (/pez|peces/.test(e)) return '🐟'; if (/hamster|hámster|roedor|cobaya/.test(e)) return '🐹'; if (/tortuga/.test(e)) return '🐢';
+    if (/caballo/.test(e)) return '🐴'; return '🐶';
+  }
+  const n = pd(m.nacimiento); if (n) { const a = (today() - n) / 31557600000; if (a < 3) return '👶'; if (a < 13) return '🧒'; if (a < 18) return '🧑'; if (a >= 70) return '🧓'; }
+  return '🧑';
+}
+function edad(s) {
+  const n = pd(s); if (!n) return '';
+  const t = today(); let m = (t.getFullYear() - n.getFullYear()) * 12 + t.getMonth() - n.getMonth(); if (t.getDate() < n.getDate()) m--;
+  if (m < 0) return ''; if (m < 24) return m === 1 ? '1 mes' : `${m} meses`;
+  const a = Math.floor(m / 12); return `${a} años`;
+}
+function chip(d, done) {
+  if (done) return `<span class="chip off">hecho</span>`;
+  const n = diasHasta(d); let c, t;
+  if (n < 0) { c = 'bad'; t = n === -1 ? 'ayer' : `hace ${-n} d`; }
+  else if (n === 0) { c = 'bad'; t = 'hoy'; }
+  else if (n === 1) { c = 'warn'; t = 'mañana'; }
+  else { c = n <= 7 ? 'warn' : n <= 30 ? 'soon' : 'ok'; t = n < 60 ? `${n} días` : n < 730 ? `${Math.round(n / 30.4)} meses` : `${Math.round(n / 365)} años`; }
+  return `<span class="chip ${c}">${t}</span>`;
+}
+
+/* ============ Eventos (para Inicio y avisos) ============ */
+function eventos() {
+  const ev = [];
+  for (const x of ITEMS) {
+    if (x.type === 'garantia') { const f = finGarantia(x); if (f) ev.push({ d: f, icon: '🧾', t: x.nombre, s: 'Fin de la garantía', x, caduca: true }); }
+    else if (x.type === 'vencimiento') { const f = pd(x.fecha); if (f) ev.push({ d: f, icon: CAT_ICON[x.categoria] || '📅', t: x.nombre, s: 'Vence', x }); }
+    else if (x.type === 'suscripcion' && x.activa !== false) { const f = proxCobro(x); if (f) ev.push({ d: f, icon: '💳', t: x.nombre, s: `Cobro de ${eur(x.precio)}`, x }); }
+    else if (x.type === 'vacuna' && x.proxima) { const f = pd(x.proxima); if (f) ev.push({ d: f, icon: '💉', t: x.nombre, s: miembroNombre(x.miembroId), x }); }
+    else if (x.type === 'cita' && !x.hecha) { const f = pd(x.fecha); if (f) ev.push({ d: f, icon: esMascota(x.miembroId) ? '🐾' : '🩺', t: x.motivo || 'Cita', s: [miembroNombre(x.miembroId), x.hora, x.profesional].filter(Boolean).join(' · '), x }); }
+  }
+  return ev.sort((a, b) => a.d - b.d);
+}
+
+/* ============ Definición de formularios ============ */
+const REP_OPTS = [['0', 'No se repite'], ['1', 'Cada mes'], ['3', 'Cada 3 meses'], ['6', 'Cada 6 meses'], ['12', 'Cada año'], ['24', 'Cada 2 años'], ['60', 'Cada 5 años'], ['120', 'Cada 10 años']];
+const VAC_REP = [['0', 'No se repite'], ['1', 'Cada mes'], ['3', 'Cada 3 meses'], ['6', 'Cada 6 meses'], ['12', 'Cada año'], ['36', 'Cada 3 años']];
+const MIEMBRO_FLD = { k: 'miembroId', l: '¿Para quién?', t: 'select', req: 1, opts: () => byType('miembro').sort((a, b) => a.nombre.localeCompare(b.nombre)).map(m => [m.id, `${emojiMiembro(m)} ${m.nombre}`]) };
+const SPEC = {
+  garantia: { titulo: 'garantía', f: [
+    { k: 'nombre', l: 'Producto', t: 'text', req: 1, ph: 'Ej: Lavadora Bosch' },
+    { k: 'tienda', l: 'Tienda', t: 'text', ph: 'Ej: MediaMarkt, Amazon…' },
+    { k: 'fechaCompra', l: 'Fecha de compra', t: 'date', req: 1, def: () => iso(today()) },
+    { k: 'anios', l: 'Años de garantía', t: 'number', def: 3, step: '0.5' },
+    { k: 'precio', l: 'Precio (€)', t: 'number', step: '0.01' },
+    { k: 'fotos', l: 'Fotos del ticket o la factura', t: 'photos' },
+    { k: 'notas', l: 'Notas', t: 'textarea', ph: 'Nº de serie, modelo, teléfono del SAT…' }] },
+  vencimiento: { titulo: 'vencimiento', f: [
+    { k: 'nombre', l: '¿Qué vence?', t: 'text', req: 1, ph: 'Ej: DNI, ITV, seguro de casa', list: 'sugVen' },
+    { k: 'categoria', l: 'Categoría', t: 'select', opts: CATS.map(c => [c, `${CAT_ICON[c]} ${c}`]), def: 'Documento' },
+    { k: 'fecha', l: 'Fecha de vencimiento', t: 'date', req: 1 },
+    { k: 'repite', l: '¿Se repite?', t: 'select', opts: REP_OPTS, def: '0' },
+    { k: 'aviso', l: 'Avisarme (días antes)', t: 'number', def: () => SET.avisoVen },
+    { k: 'fotos', l: 'Fotos', t: 'photos' },
+    { k: 'notas', l: 'Notas', t: 'textarea', ph: 'Nº de póliza, matrícula, dónde renovarlo…' }] },
+  suscripcion: { titulo: 'suscripción', f: [
+    { k: 'nombre', l: 'Nombre', t: 'text', req: 1, ph: 'Ej: Netflix', list: 'sugSus' },
+    { k: 'precio', l: 'Precio (€)', t: 'number', req: 1, step: '0.01' },
+    { k: 'periodo', l: 'Se cobra', t: 'select', opts: [['semanal', 'Cada semana'], ['mensual', 'Cada mes'], ['trimestral', 'Cada 3 meses'], ['semestral', 'Cada 6 meses'], ['anual', 'Cada año']], def: 'mensual' },
+    { k: 'proxima', l: 'Fecha del próximo cobro', t: 'date', req: 1 },
+    { k: 'aviso', l: 'Avisarme (días antes del cobro)', t: 'number', def: () => SET.avisoSus },
+    { k: 'activa', l: 'Suscripción activa', t: 'check', def: true },
+    { k: 'notas', l: 'Notas', t: 'textarea', ph: 'Cuenta, cómo darse de baja…' }] },
+  miembro: { titulo: 'persona o mascota', f: [
+    { k: 'nombre', l: 'Nombre', t: 'text', req: 1, ph: 'Ej: Lucía, Toby…' },
+    { k: 'tipo', l: 'Es…', t: 'select', opts: [['persona', '🧑 Una persona'], ['mascota', '🐾 Una mascota']], def: 'persona' },
+    { k: 'especie', l: 'Especie y raza (si es mascota)', t: 'text', ph: 'Ej: Perro, labrador' },
+    { k: 'nacimiento', l: 'Fecha de nacimiento', t: 'date' },
+    { k: 'notas', l: 'Datos útiles', t: 'textarea', ph: 'Alergias, grupo sanguíneo, nº de microchip, centro de salud, clínica…' }] },
+  vacuna: { titulo: 'vacuna o tratamiento', f: [
+    MIEMBRO_FLD,
+    { k: 'nombre', l: 'Vacuna o tratamiento', t: 'text', req: 1, ph: 'Ej: Triple vírica, desparasitación…', list: 'sugVac' },
+    { k: 'fechaPuesta', l: 'Fecha en que se puso', t: 'date' },
+    { k: 'repiteMeses', l: '¿Se repite?', t: 'select', opts: VAC_REP, def: '0' },
+    { k: 'proxima', l: 'Próxima dosis (si la hay)', t: 'date', hint: 'Si la dejas vacía y se repite, se calcula sola.' },
+    { k: 'aviso', l: 'Avisarme (días antes)', t: 'number', def: () => SET.avisoVac },
+    { k: 'fotos', l: 'Foto de la cartilla', t: 'photos' },
+    { k: 'notas', l: 'Notas', t: 'textarea', ph: 'Lote, centro, reacciones…' }] },
+  cita: { titulo: 'cita', f: [
+    MIEMBRO_FLD,
+    { k: 'motivo', l: 'Motivo', t: 'text', req: 1, ph: 'Ej: Revisión de los 2 años' },
+    { k: 'profesional', l: 'Con quién', t: 'text', ph: 'Pediatra, veterinario, dentista…', list: 'sugProf' },
+    { k: 'fecha', l: 'Día', t: 'date', req: 1 },
+    { k: 'hora', l: 'Hora', t: 'time', def: '10:00' },
+    { k: 'lugar', l: 'Lugar', t: 'text', ph: 'Centro de salud, clínica…' },
+    { k: 'notas', l: 'Notas', t: 'textarea', ph: 'Qué preguntar, qué llevar, resultado…' },
+    { k: 'hecha', l: 'Ya hemos ido', t: 'check', def: false }] }
+};
+
+/* ============ Overlays (modales) ============ */
+const overlays = [];
+function openOverlay(el, onClose) {
+  document.body.appendChild(el);
+  const close = () => { const i = overlays.indexOf(close); if (i >= 0) overlays.splice(i, 1); el.remove(); onClose && onClose(); };
+  overlays.push(close);
+  return close;
+}
+const closeTop = () => { if (overlays.length) { overlays[overlays.length - 1](); return true; } return false; };
+function sheet(html) {
+  const ov = document.createElement('div'); ov.className = 'ov';
+  ov.innerHTML = `<div class="sheet">${html}</div>`;
+  const close = openOverlay(ov);
+  ov.addEventListener('click', e => { if (e.target === ov) close(); });
+  ov.querySelectorAll('[data-close]').forEach(b => b.onclick = close);
+  return { el: ov, close };
+}
+function verFoto(src) {
+  const v = document.createElement('div'); v.className = 'viewer';
+  v.innerHTML = `<img src="${src}" alt=""><button aria-label="Cerrar">✕</button>`;
+  const close = openOverlay(v); v.onclick = close;
+}
+function confirmar(msg, okTxt = 'Sí', danger = false) {
+  return new Promise(res => {
+    const s = sheet(`<h3>${esc(msg)}</h3><div class="acts"><button class="btn sec" data-r="0">Cancelar</button><button class="btn ${danger ? 'danger' : ''}" data-r="1">${esc(okTxt)}</button></div>`);
+    let done = false;
+    s.el.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { done = true; s.close(); res(b.dataset.r === '1'); });
+    const obs = new MutationObserver(() => { if (!document.body.contains(s.el)) { obs.disconnect(); if (!done) res(false); } });
+    obs.observe(document.body, { childList: true });
+  });
+}
+
+/* ============ Fotos ============ */
+function comprimir(file) {
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const M = 1400; let w = img.width, h = img.height; const s = Math.min(1, M / Math.max(w, h));
+        w = Math.round(w * s); h = Math.round(h * s);
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h); res(c.toDataURL('image/jpeg', 0.72));
+      };
+      img.onerror = rej; img.src = fr.result;
+    };
+    fr.onerror = rej; fr.readAsDataURL(file);
+  });
+}
+
+/* ============ Formulario genérico ============ */
+function abrirForm(type, item, preset = {}) {
+  const sp = SPEC[type]; const editing = !!item;
+  const data = item ? JSON.parse(JSON.stringify(item)) : { type, ...preset };
+  if (!editing) for (const f of sp.f) if (data[f.k] === undefined && f.def !== undefined) data[f.k] = typeof f.def === 'function' ? f.def() : f.def;
+  if ((type === 'vacuna' || type === 'cita') && !byType('miembro').length) {
+    toast('Primero añade a una persona o mascota'); abrirForm('miembro'); return;
+  }
+  const fotos = { };
+  let html = `<h3>${editing ? 'Editar' : 'Nueva'} ${sp.titulo}<button class="x" data-close>✕</button></h3><form id="frm" autocomplete="off">`;
+  for (const f of sp.f) {
+    const v = data[f.k] ?? '';
+    if (f.t === 'check') { html += `<div class="fld"><label class="chk"><input type="checkbox" name="${f.k}" ${v ? 'checked' : ''}> ${f.l}</label></div>`; continue; }
+    html += `<div class="fld"><label>${f.l}${f.req ? ' *' : ''}</label>`;
+    if (f.t === 'select') {
+      const opts = typeof f.opts === 'function' ? f.opts() : f.opts;
+      html += `<select name="${f.k}">${opts.map(([val, lab]) => `<option value="${esc(val)}" ${String(v) === String(val) ? 'selected' : ''}>${esc(lab)}</option>`).join('')}</select>`;
+    } else if (f.t === 'textarea') html += `<textarea name="${f.k}" placeholder="${esc(f.ph || '')}">${esc(v)}</textarea>`;
+    else if (f.t === 'photos') { fotos[f.k] = Array.isArray(v) ? v.slice() : []; html += `<div class="photos" data-ph="${f.k}"></div>`; }
+    else html += `<input name="${f.k}" type="${f.t === 'number' ? 'number' : f.t}" ${f.t === 'number' ? `inputmode="decimal" step="${f.step || '1'}"` : ''} value="${esc(v)}" placeholder="${esc(f.ph || '')}" ${f.list ? `list="${f.list}"` : ''}>`;
+    if (f.hint) html += `<div class="info" style="margin:5px 2px 0">${esc(f.hint)}</div>`;
+    html += `</div>`;
+  }
+  html += `<div class="acts">${editing ? `<button type="button" class="btn danger" id="delBtn">Eliminar</button>` : ''}<button class="btn" type="submit">Guardar</button></div></form>`;
+  const s = sheet(html); const frm = $('#frm', s.el);
+
+  const pintarFotos = k => {
+    const box = s.el.querySelector(`[data-ph="${k}"]`);
+    box.innerHTML = fotos[k].map((src, i) => `<div class="ph"><img src="${src}" data-v="${i}"><button type="button" data-d="${i}">✕</button></div>`).join('') +
+      `<button type="button" class="addph"><span>📷</span>Añadir</button>`;
+    box.querySelectorAll('[data-v]').forEach(im => im.onclick = () => verFoto(fotos[k][+im.dataset.v]));
+    box.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { fotos[k].splice(+b.dataset.d, 1); pintarFotos(k); });
+    box.querySelector('.addph').onclick = () => {
+      const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.multiple = true;
+      inp.onchange = async () => {
+        for (const file of inp.files) { try { fotos[k].push(await comprimir(file)); } catch (e) { toast('No se pudo leer la foto'); } }
+        pintarFotos(k);
+      };
+      inp.click();
+    };
+  };
+  Object.keys(fotos).forEach(pintarFotos);
+
+  frm.onsubmit = async e => {
+    e.preventDefault();
+    for (const f of sp.f) {
+      if (f.t === 'photos') { data[f.k] = fotos[f.k]; continue; }
+      const el = frm.elements[f.k];
+      if (f.t === 'check') data[f.k] = el.checked;
+      else if (f.t === 'number') data[f.k] = el.value === '' ? '' : +el.value;
+      else data[f.k] = el.value.trim();
+      if (f.req && (data[f.k] === '' || data[f.k] == null)) { toast(`Falta: ${f.l}`); el.focus(); return; }
+    }
+    if (type === 'vacuna' && !data.proxima && +data.repiteMeses > 0 && data.fechaPuesta) data.proxima = iso(addM(pd(data.fechaPuesta), +data.repiteMeses));
+    if (!data.id) { data.id = uid(); data.creado = Date.now(); }
+    await dbPut(data); s.close(); await reload(); toast('Guardado ✓');
+    if (!editing) pedirPermisoUnaVez();
+  };
+  const del = $('#delBtn', s.el);
+  if (del) del.onclick = async () => {
+    const extra = type === 'miembro' ? ' Se borrarán también sus vacunas y citas.' : '';
+    if (!(await confirmar(`¿Eliminar "${item.nombre || item.motivo}"?${extra}`, 'Eliminar', true))) return;
+    await dbDel(item.id);
+    if (type === 'miembro') for (const x of ITEMS.filter(x => x.miembroId === item.id)) await dbDel(x.id);
+    s.close(); if (type === 'miembro') state.member = null; await reload(); toast('Eliminado');
+  };
+}
+
+/* ============ Acciones rápidas ============ */
+async function renovar(id) {
+  const x = getItem(id); if (!x) return;
+  const nueva = addM(pd(x.fecha), +x.repite);
+  if (!(await confirmar(`¿Renovado? La nueva fecha será el ${fmt(nueva)}.`, 'Sí, renovado'))) return;
+  x.fecha = iso(nueva); await dbPut(x); await reload(); toast('Fecha actualizada ✓');
+}
+async function vacunaPuesta(id) {
+  const x = getItem(id); if (!x) return;
+  const rep = +x.repiteMeses || 0;
+  x.fechaPuesta = iso(today()); x.proxima = rep ? iso(addM(today(), rep)) : '';
+  await dbPut(x); await reload(); toast(rep ? `Hecho ✓ Próxima: ${fmt(pd(x.proxima))}` : 'Marcada como puesta ✓');
+}
+async function citaHecha(id) { const x = getItem(id); if (!x) return; x.hecha = true; await dbPut(x); await reload(); toast('Cita marcada como hecha ✓'); }
+
+/* ============ Vistas ============ */
+const state = { tab: 'inicio', member: null, q: {} };
+const TITLES = { inicio: 'Mi Caja Fuerte', garantias: 'Garantías', vencimientos: 'Vencimientos', suscripciones: 'Suscripciones', familia: 'Familia' };
+
+function rowHTML({ id, icon, img, t, s, endTop, endBot, action }) {
+  return `<div class="row" data-id="${id}"><div class="ic">${img ? `<img src="${img}" alt="">` : icon}</div>
+    <div class="mid"><div class="t">${esc(t)}</div><div class="s">${s || ''}</div></div>
+    <div class="end">${endTop || ''}${endBot ? `<small>${endBot}</small>` : ''}${action || ''}</div></div>`;
+}
+function emptyHTML(big, title, txt, type, btn) {
+  return `<div class="empty"><div class="big">${big}</div><b>${title}</b><p>${txt}</p><button class="btn" data-add="${type}">${btn}</button></div>`;
+}
+const searchHTML = ph => `<input class="search" id="q" type="search" placeholder="🔍  ${ph}" value="${esc(state.q[state.tab] || '')}">`;
+const matchQ = (...fields) => { const q = (state.q[state.tab] || '').toLowerCase().trim(); return !q || fields.some(f => String(f || '').toLowerCase().includes(q)); };
+
+function vInicio() {
+  const ev = eventos(), t = today(), lim = addD(t, 60);
+  const atras = ev.filter(e => e.d < t && !e.caduca);
+  const prox = ev.filter(e => e.d >= t && e.d <= lim);
+  const gar = byType('garantia'); const garVig = gar.filter(g => { const f = finGarantia(g); return f && f >= t; });
+  const garPronto = garVig.filter(g => diasHasta(finGarantia(g)) <= 90).length;
+  const sus = byType('suscripcion').filter(s => s.activa !== false); const mes = sus.reduce((a, s) => a + mensual(s), 0);
+  const ven30 = ev.filter(e => e.x.type === 'vencimiento' && e.d >= t && diasHasta(e.d) <= 30).length;
+  const citas = ev.filter(e => e.x.type === 'cita' && e.d >= t).length;
+  let h = `<div class="stats">
+    <div class="stat" data-go="garantias"><div class="lbl">🧾 Garantías</div><b>${garVig.length}</b><small>${garPronto ? `${garPronto} caducan en 3 meses` : 'vigentes'}</small></div>
+    <div class="stat" data-go="suscripciones"><div class="lbl">💳 Suscripciones</div><b>${eur(mes)}</b><small>al mes · ${eur(mes * 12)} al año</small></div>
+    <div class="stat" data-go="vencimientos"><div class="lbl">📅 Vencimientos</div><b>${ven30}</b><small>en los próximos 30 días</small></div>
+    <div class="stat" data-go="familia"><div class="lbl">🩺 Citas</div><b>${citas}</b><small>próximas</small></div></div>`;
+  const evRow = e => rowHTML({ id: e.x.id, icon: e.icon, t: e.t, s: esc(e.s), endTop: chip(e.d), endBot: e.x.type === 'cita' ? fmtC(e.d) : fmt(e.d) });
+  if (atras.length) h += `<h2>⚠️ Pendientes atrasados</h2><div class="list">${atras.map(evRow).join('')}</div>`;
+  if (!ITEMS.length) {
+    h += `<div class="empty" style="margin-top:6px"><div class="big">🔐</div><b>Todo lo importante, en un sitio</b>
+      <p>Guarda tus garantías, lo que vence, tus suscripciones y las vacunas y citas de la familia. Te avisaremos a tiempo.<br><br>Sin internet, sin cuentas: todo se queda en tu móvil.</p>
+      <button class="btn" id="startBtn">Añadir lo primero</button></div>`;
+  } else if (prox.length) h += `<h2>Próximos 60 días</h2><div class="list">${prox.map(evRow).join('')}</div>`;
+  else h += `<h2>Próximos 60 días</h2><div class="empty">✅ Nada pendiente en los próximos 60 días.</div>`;
+  return h;
+}
+
+function vGarantias() {
+  const t = today();
+  const all = byType('garantia').filter(g => matchQ(g.nombre, g.tienda, g.notas)).map(g => ({ g, f: finGarantia(g) })).sort((a, b) => a.f - b.f);
+  if (!byType('garantia').length) return emptyHTML('🧾', 'Sin garantías todavía', 'Haz una foto al ticket cuando compres algo y te avisaremos antes de que se acabe la garantía.', 'garantia', 'Añadir garantía');
+  const r = ({ g, f }) => rowHTML({ id: g.id, icon: '🧾', img: (g.fotos || [])[0], t: g.nombre, s: esc([g.tienda, `comprado ${fmt(pd(g.fechaCompra))}`, g.precio !== '' && g.precio != null ? eur(g.precio) : ''].filter(Boolean).join(' · ')), endTop: f < t ? `<span class="chip off">caducada</span>` : chip(f), endBot: `hasta ${fmt(f)}` });
+  const vig = all.filter(x => x.f >= t), cad = all.filter(x => x.f < t).reverse();
+  let h = searchHTML('Buscar producto o tienda');
+  h += vig.length ? `<h2>En garantía (${vig.length})</h2><div class="list">${vig.map(r).join('')}</div>` : `<div class="empty">No hay garantías vigentes${state.q[state.tab] ? ' con esa búsqueda' : ''}.</div>`;
+  if (cad.length) h += `<details><summary>Caducadas (${cad.length})</summary><div class="list">${cad.map(r).join('')}</div></details>`;
+  return h;
+}
+
+function vVencimientos() {
+  if (!byType('vencimiento').length) return emptyHTML('📅', 'Nada que venza… todavía', 'DNI, carnet, ITV, seguros, revisión de la caldera… Apúntalos y no se te volverá a pasar ninguno.', 'vencimiento', 'Añadir vencimiento');
+  const all = byType('vencimiento').filter(v => matchQ(v.nombre, v.categoria, v.notas)).sort((a, b) => pd(a.fecha) - pd(b.fecha));
+  let h = searchHTML('Buscar');
+  if (!all.length) return h + `<div class="empty">Sin resultados.</div>`;
+  h += `<div class="list">${all.map(v => {
+    const f = pd(v.fecha), rep = +v.repite;
+    return rowHTML({ id: v.id, icon: CAT_ICON[v.categoria] || '📅', t: v.nombre, s: esc([v.categoria, rep ? `se repite ${REP_TXT[rep] || ''}` : ''].filter(Boolean).join(' · ')),
+      endTop: chip(f), endBot: fmt(f), action: rep && diasHasta(f) <= 60 ? `<button class="qbtn" data-act="renovar" data-aid="${v.id}">Renovado ✓</button>` : '' });
+  }).join('')}</div>`;
+  return h;
+}
+
+function vSuscripciones() {
+  const all = byType('suscripcion');
+  if (!all.length) return emptyHTML('💳', 'Controla lo que pagas cada mes', 'Apunta tus suscripciones y te avisaremos unos días antes de cada cobro, para que canceles lo que no uses.', 'suscripcion', 'Añadir suscripción');
+  const act = all.filter(s => s.activa !== false), canc = all.filter(s => s.activa === false);
+  const mes = act.reduce((a, s) => a + mensual(s), 0), ahorro = canc.reduce((a, s) => a + mensual(s), 0) * 12;
+  let h = `<div class="summary"><div><small>Pagas al mes</small><b>${eur(mes)}</b></div><div style="text-align:right"><small>Al año</small><b>${eur(mes * 12)}</b></div></div>`;
+  if (ahorro > 0) h += `<div class="info">🎉 Por las suscripciones canceladas te ahorras <b>${eur(ahorro)}</b> al año.</div>`;
+  h += searchHTML('Buscar');
+  const r = s => { const f = proxCobro(s), P = PER[s.periodo] || PER.mensual;
+    return rowHTML({ id: s.id, icon: '💳', t: s.nombre, s: `${eur(s.precio)} / ${P.l}${s.periodo !== 'mensual' ? ` · ${eur(mensual(s))}/mes` : ''}`, endTop: s.activa === false ? `<span class="chip off">cancelada</span>` : (f ? chip(f) : ''), endBot: s.activa === false ? '' : (f ? `cobro ${fmt(f)}` : '') }); };
+  const a = act.filter(s => matchQ(s.nombre, s.notas)).sort((x, y) => (proxCobro(x) || 0) - (proxCobro(y) || 0));
+  const c = canc.filter(s => matchQ(s.nombre, s.notas));
+  h += a.length ? `<h2>Activas (${a.length})</h2><div class="list">${a.map(r).join('')}</div>` : `<div class="empty">No hay suscripciones activas.</div>`;
+  if (c.length) h += `<details><summary>Canceladas (${c.length})</summary><div class="list">${c.map(r).join('')}</div></details>`;
+  return h;
+}
+
+function citaRow(c, conNombre) {
+  const f = pd(c.fecha);
+  return rowHTML({ id: c.id, icon: esMascota(c.miembroId) ? '🐾' : '🩺', t: c.motivo || 'Cita',
+    s: esc([conNombre ? miembroNombre(c.miembroId) : '', c.profesional, c.lugar].filter(Boolean).join(' · ')),
+    endTop: chip(f, c.hecha), endBot: `${fmtC(f)}${c.hora ? ' · ' + c.hora : ''}`,
+    action: !c.hecha && diasHasta(f) <= 0 ? `<button class="qbtn" data-act="cita" data-aid="${c.id}">Hecha ✓</button>` : '' });
+}
+function vacRow(v) {
+  const f = pd(v.proxima), p = pd(v.fechaPuesta), rep = +v.repiteMeses;
+  return rowHTML({ id: v.id, icon: '💉', t: v.nombre, s: esc([p ? `puesta ${fmt(p)}` : '', rep ? REP_TXT[rep] : ''].filter(Boolean).join(' · ')),
+    endTop: f ? chip(f) : `<span class="chip ok">al día</span>`, endBot: f ? `próxima ${fmt(f)}` : '',
+    action: f && diasHasta(f) <= 30 ? `<button class="qbtn" data-act="vac" data-aid="${v.id}">Puesta ✓</button>` : '' });
+}
+
+function vFamilia() {
+  const mem = byType('miembro').sort((a, b) => (a.tipo === b.tipo ? a.nombre.localeCompare(b.nombre) : a.tipo === 'persona' ? -1 : 1));
+  if (!mem.length) return emptyHTML('👨‍👩‍👧', 'Vacunas y citas de toda la familia', 'Añade a tus hijos, a ti mismo o a tus mascotas para llevar sus vacunas, desparasitaciones y citas del pediatra o del veterinario, con avisos.', 'miembro', 'Añadir persona o mascota');
+  const t = today();
+  const citas = byType('cita').filter(c => !c.hecha && pd(c.fecha) >= addD(t, -30)).sort((a, b) => (pd(a.fecha) - pd(b.fecha)) || String(a.hora).localeCompare(b.hora));
+  let h = '';
+  if (citas.length) h += `<h2>Próximas citas</h2><div class="list">${citas.map(c => citaRow(c, true)).join('')}</div>`;
+  h += `<div class="sechead"><h2>Familia</h2><button class="qbtn" data-add="miembro">+ Añadir</button></div><div class="members">${mem.map(m => {
+    const pend = ITEMS.filter(x => x.miembroId === m.id && ((x.type === 'cita' && !x.hecha && pd(x.fecha) >= t) || (x.type === 'vacuna' && x.proxima && diasHasta(pd(x.proxima)) <= 30))).length;
+    return `<div class="mcard" data-mem="${m.id}"><div class="em">${emojiMiembro(m)}</div><div class="n">${esc(m.nombre)}</div>
+      <div class="s">${esc([m.tipo === 'mascota' ? (m.especie || 'Mascota') : '', edad(m.nacimiento)].filter(Boolean).join(' · ') || '&nbsp;')}</div>
+      ${pend ? `<div class="s" style="color:var(--warn);font-weight:600">${pend} pendiente${pend > 1 ? 's' : ''}</div>` : ''}</div>`; }).join('')}</div>`;
+  return h;
+}
+
+function vMiembro() {
+  const m = getItem(state.member); if (!m) { state.member = null; return vFamilia(); }
+  const t = today();
+  const citas = byType('cita').filter(c => c.miembroId === m.id);
+  const prox = citas.filter(c => !c.hecha).sort((a, b) => pd(a.fecha) - pd(b.fecha));
+  const hist = citas.filter(c => c.hecha).sort((a, b) => pd(b.fecha) - pd(a.fecha));
+  const vac = byType('vacuna').filter(v => v.miembroId === m.id).sort((a, b) => (a.proxima ? pd(a.proxima) : 9e15) - (b.proxima ? pd(b.proxima) : 9e15));
+  const esM = m.tipo === 'mascota';
+  let h = `<div class="mhead" data-editmem="1"><div class="em">${emojiMiembro(m)}</div><div style="flex:1;min-width:0"><div class="n">${esc(m.nombre)}</div>
+    <div class="s">${esc([esM ? (m.especie || 'Mascota') : '', edad(m.nacimiento) ? edad(m.nacimiento) : '', m.nacimiento ? `nació el ${fmt(pd(m.nacimiento))}` : ''].filter(Boolean).join(' · '))}</div></div><button class="qbtn">Editar</button></div>`;
+  if (m.notas) h += `<div class="notes">${esc(m.notas)}</div>`;
+  h += `<div class="sechead"><h2>Citas</h2><button class="qbtn" data-add="cita" data-pre="${m.id}">+ Cita</button></div>`;
+  h += prox.length ? `<div class="list">${prox.map(c => citaRow(c)).join('')}</div>` : `<div class="empty" style="padding:18px">Sin citas pendientes${esM ? ' con el veterinario' : ''}.</div>`;
+  if (hist.length) h += `<details><summary>Historial de citas (${hist.length})</summary><div class="list">${hist.map(c => citaRow(c)).join('')}</div></details>`;
+  h += `<div class="sechead"><h2>${esM ? 'Vacunas y desparasitación' : 'Vacunas'}</h2><button class="qbtn" data-add="vacuna" data-pre="${m.id}">+ Añadir</button></div>`;
+  h += vac.length ? `<div class="list">${vac.map(vacRow).join('')}</div>` : `<div class="empty" style="padding:18px">${esM ? 'Apunta sus vacunas y desparasitaciones (por ejemplo, cada 3 meses) y te avisaremos.' : 'Apunta las vacunas de su cartilla y la fecha de la próxima dosis.'}</div>`;
+  return h;
+}
+
+function render() {
+  const main = $('#main');
+  const html = state.tab === 'familia' && state.member ? vMiembro() : ({ inicio: vInicio, garantias: vGarantias, vencimientos: vVencimientos, suscripciones: vSuscripciones, familia: vFamilia })[state.tab]();
+  main.innerHTML = html;
+  $('#title').textContent = state.member && state.tab === 'familia' ? (getItem(state.member) || {}).nombre || 'Familia' : TITLES[state.tab];
+  $('#backBtn').style.display = state.member && state.tab === 'familia' ? '' : 'none';
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.t === state.tab));
+  const q = $('#q');
+  if (q) q.oninput = () => { state.q[state.tab] = q.value; const pos = q.selectionStart; render(); const nq = $('#q'); nq.focus(); try { nq.setSelectionRange(pos, pos); } catch (e) {} };
+}
+
+/* ============ Eventos de la interfaz ============ */
+$('#main').addEventListener('click', e => {
+  const act = e.target.closest('[data-act]');
+  if (act) { e.stopPropagation(); const id = act.dataset.aid; ({ renovar, vac: vacunaPuesta, cita: citaHecha })[act.dataset.act](id); return; }
+  const add = e.target.closest('[data-add]');
+  if (add) { abrirForm(add.dataset.add, null, add.dataset.pre ? { miembroId: add.dataset.pre } : {}); return; }
+  if (e.target.closest('#startBtn')) { elegirTipo(); return; }
+  const go = e.target.closest('[data-go]'); if (go) { setTab(go.dataset.go); return; }
+  const mem = e.target.closest('[data-mem]'); if (mem) { state.member = mem.dataset.mem; render(); window.scrollTo(0, 0); return; }
+  if (e.target.closest('[data-editmem]')) { abrirForm('miembro', getItem(state.member)); return; }
+  const row = e.target.closest('.row'); if (row) { const x = getItem(row.dataset.id); if (x) abrirForm(x.type, x); }
+});
+function setTab(t) { state.tab = t; state.member = null; render(); window.scrollTo(0, 0); }
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => setTab(b.dataset.t));
+$('#backBtn').onclick = () => { state.member = null; render(); };
+
+function elegirTipo() {
+  const s = sheet(`<h3>¿Qué quieres añadir?<button class="x" data-close>✕</button></h3><div class="choose">
+    <button data-c="garantia"><span>🧾</span>Garantía</button><button data-c="vencimiento"><span>📅</span>Vencimiento</button>
+    <button data-c="suscripcion"><span>💳</span>Suscripción</button><button data-c="cita"><span>🩺</span>Cita médica o veterinaria</button>
+    <button data-c="vacuna"><span>💉</span>Vacuna o tratamiento</button><button data-c="miembro"><span>👨‍👩‍👧</span>Persona o mascota</button></div>`);
+  s.el.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { s.close(); abrirForm(b.dataset.c); });
+}
+$('#fab').onclick = () => {
+  if (state.tab === 'familia' && state.member) {
+    const s = sheet(`<h3>Añadir a ${esc(miembroNombre(state.member))}<button class="x" data-close>✕</button></h3><div class="choose">
+      <button data-c="cita"><span>🩺</span>Cita</button><button data-c="vacuna"><span>💉</span>Vacuna o tratamiento</button></div>`);
+    s.el.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { s.close(); abrirForm(b.dataset.c, null, { miembroId: state.member }); });
+    return;
+  }
+  const map = { garantias: 'garantia', vencimientos: 'vencimiento', suscripciones: 'suscripcion' };
+  if (map[state.tab]) abrirForm(map[state.tab]);
+  else if (state.tab === 'familia') {
+    const s = sheet(`<h3>¿Qué quieres añadir?<button class="x" data-close>✕</button></h3><div class="choose">
+      <button data-c="cita"><span>🩺</span>Cita</button><button data-c="vacuna"><span>💉</span>Vacuna o tratamiento</button>
+      <button data-c="miembro" style="grid-column:span 2"><span>👨‍👩‍👧</span>Persona o mascota</button></div>`);
+    s.el.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { s.close(); abrirForm(b.dataset.c); });
+  } else elegirTipo();
+};
+
+/* ============ Avisos (notificaciones locales) ============ */
+async function permisoAvisos() {
+  const LN = Plug('LocalNotifications'); if (!LN) return false;
+  try { let s = await LN.checkPermissions(); if (s.display !== 'granted') s = await LN.requestPermissions(); return s.display === 'granted'; } catch (e) { return false; }
+}
+async function pedirPermisoUnaVez() {
+  try { if (localStorage.getItem('mcf_perm')) return; localStorage.setItem('mcf_perm', '1'); } catch (e) {}
+  if (await permisoAvisos()) scheduleAll();
+}
+let schedT; function scheduleAll() { clearTimeout(schedT); schedT = setTimeout(programar, 700); }
+async function programar() {
+  const LN = Plug('LocalNotifications'); if (!LN) return;
+  try {
+    const perm = await LN.checkPermissions(); if (perm.display !== 'granted') return;
+    const pend = await LN.getPending();
+    if (pend.notifications && pend.notifications.length) await LN.cancel({ notifications: pend.notifications.map(n => ({ id: n.id })) });
+    const [hh, mm] = (SET.hora || '10:00').split(':').map(Number);
+    const at = (d, h = hh, m = mm) => { const r = new Date(d); r.setHours(h, m, 0, 0); return r; };
+    const now = new Date(), lim = addD(today(), 400), L = [];
+    const add = (when, title, body) => { if (when > now && when < lim) L.push({ when, title, body }); };
+    const pre = (fecha, dias, title, antes, hoy) => { dias = +dias || 0; if (dias > 0) add(at(addD(fecha, -dias)), title, antes); add(at(fecha), title, hoy); };
+    for (const x of ITEMS) {
+      if (x.type === 'garantia') { const f = finGarantia(x); if (f) pre(f, SET.avisoGar, '🧾 Garantía a punto de caducar', `La garantía de ${x.nombre} caduca el ${fmt(f)}. Si tiene algún fallo, reclámalo ya.`, `Hoy caduca la garantía de ${x.nombre}.`); }
+      else if (x.type === 'vencimiento') { const f = pd(x.fecha); const d = x.aviso === '' || x.aviso == null ? SET.avisoVen : x.aviso; if (f) pre(f, d, `${CAT_ICON[x.categoria] || '📅'} ${x.nombre}`, `Vence el ${fmt(f)}. ¡Que no se te pase!`, `Vence hoy: ${x.nombre}.`); }
+      else if (x.type === 'suscripcion' && x.activa !== false) {
+        const d = x.aviso === '' || x.aviso == null ? SET.avisoSus : +x.aviso;
+        for (const f of cobros(x, lim).slice(0, 6)) {
+          if (d > 0) add(at(addD(f, -d)), `💳 Próximo cobro: ${x.nombre}`, `El ${fmt(f)} te cobrarán ${eur(x.precio)}. Si no la usas, cancélala antes.`);
+          else add(at(f), `💳 Hoy te cobran ${x.nombre}`, `Cargo de ${eur(x.precio)}.`);
+        }
+      }
+      else if (x.type === 'vacuna' && x.proxima) { const f = pd(x.proxima); const d = x.aviso === '' || x.aviso == null ? SET.avisoVac : x.aviso; const n = miembroNombre(x.miembroId);
+        if (f) pre(f, d, `💉 ${x.nombre} · ${n}`, `Le toca el ${fmt(f)}. Pide cita con tiempo.`, `Hoy le toca a ${n}: ${x.nombre}.`); }
+      else if (x.type === 'cita' && !x.hecha) { const f = pd(x.fecha); if (!f) continue; const [h, m] = (x.hora || '10:00').split(':').map(Number);
+        const icon = esMascota(x.miembroId) ? '🐾' : '🩺'; const det = [miembroNombre(x.miembroId), x.hora, x.profesional, x.lugar].filter(Boolean).join(' · ');
+        add(at(addD(f, -1)), `${icon} Mañana: ${x.motivo}`, det);
+        add(new Date(at(f, h, m) - 2 * 3600e3), `${icon} Cita en 2 horas: ${x.motivo}`, det); }
+    }
+    L.sort((a, b) => a.when - b.when);
+    const list = L.slice(0, 60).map((n, i) => ({ id: i + 1, title: n.title, body: n.body, schedule: { at: n.when, allowWhileIdle: true } }));
+    if (list.length) await LN.schedule({ notifications: list });
+  } catch (e) { console.warn('Avisos', e); }
+}
+
+/* ============ Ajustes y copia de seguridad ============ */
+function abrirAjustes() {
+  const s = sheet(`<h3>Ajustes<button class="x" data-close>✕</button></h3>
+    <div class="set-g"><div class="fld"><label>Hora de los avisos</label><input type="time" id="sHora" value="${esc(SET.hora)}"></div>
+    <div class="grid2"><div class="fld"><label>Garantías (días antes)</label><input type="number" id="sGar" value="${SET.avisoGar}"></div>
+    <div class="fld"><label>Vencimientos (días antes)</label><input type="number" id="sVen" value="${SET.avisoVen}"></div>
+    <div class="fld"><label>Suscripciones (días antes)</label><input type="number" id="sSus" value="${SET.avisoSus}"></div>
+    <div class="fld"><label>Vacunas (días antes)</label><input type="number" id="sVac" value="${SET.avisoVac}"></div></div></div>
+    <button class="btn sec full" id="sTest">🔔 Probar un aviso</button>
+    <h2>Copia de seguridad</h2>
+    <div class="info">Tus datos se guardan solo en este móvil, sin internet y sin cuentas. Haz una copia de vez en cuando y guárdala (en el correo, en Drive o en el ordenador) por si cambias de móvil.</div>
+    <div class="grid2"><button class="btn sec" id="sExp">⬆️ Exportar copia</button><button class="btn sec" id="sImp">⬇️ Importar copia</button></div>
+    <h2>Zona peligrosa</h2><button class="btn danger full" id="sDel">Borrar todos los datos</button>
+    <div class="info" style="text-align:center;margin-top:16px">Mi Caja Fuerte v1.0 · Sin anuncios · Sin suscripciones</div>`);
+  const guardar = () => {
+    SET.hora = $('#sHora', s.el).value || '10:00';
+    for (const [k, id] of [['avisoGar', 'sGar'], ['avisoVen', 'sVen'], ['avisoSus', 'sSus'], ['avisoVac', 'sVac']]) { const v = parseInt($('#' + id, s.el).value, 10); SET[k] = isNaN(v) || v < 0 ? DEF_SET[k] : v; }
+    saveSet(); scheduleAll();
+  };
+  s.el.querySelectorAll('input').forEach(i => i.onchange = guardar);
+  $('#sTest', s.el).onclick = async () => {
+    const LN = Plug('LocalNotifications');
+    if (!LN) { toast('Los avisos funcionan en la app instalada en el móvil'); return; }
+    if (!(await permisoAvisos())) { toast('Activa las notificaciones de la app en los ajustes de Android'); return; }
+    await LN.schedule({ notifications: [{ id: 9999, title: '🔔 Mi Caja Fuerte', body: '¡Los avisos funcionan! Así te avisaremos de lo importante.', schedule: { at: new Date(Date.now() + 5000), allowWhileIdle: true } }] });
+    toast('Recibirás un aviso en 5 segundos');
+  };
+  $('#sExp', s.el).onclick = exportar;
+  $('#sImp', s.el).onclick = importar;
+  $('#sDel', s.el).onclick = async () => {
+    if (!(await confirmar('¿Borrar TODOS los datos? No se puede deshacer.', 'Borrar todo', true))) return;
+    if (!(await confirmar('¿Seguro del todo? Te recomendamos exportar una copia antes.', 'Sí, borrar', true))) return;
+    await dbClear(); s.close(); state.member = null; await reload(); toast('Datos borrados');
+  };
+}
+async function exportar() {
+  const data = JSON.stringify({ app: 'MiCajaFuerte', v: 1, fecha: new Date().toISOString(), settings: SET, items: ITEMS });
+  const name = `copia-micajafuerte-${iso(today())}.json`;
+  try {
+    if (isNative && Plug('Filesystem') && Plug('Share')) {
+      const r = await Plug('Filesystem').writeFile({ path: name, data, directory: 'CACHE', encoding: 'utf8' });
+      await Plug('Share').share({ title: 'Copia de Mi Caja Fuerte', text: 'Copia de seguridad de Mi Caja Fuerte', files: [r.uri], dialogTitle: 'Guardar la copia en…' });
+    } else {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([data], { type: 'application/json' })); a.download = name;
+      document.body.appendChild(a); a.click(); a.remove(); toast('Copia descargada');
+    }
+  } catch (e) { if (!/cancel/i.test(String(e && e.message))) toast('No se pudo exportar la copia'); }
+}
+function importar() {
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'application/json,.json,*/*';
+  inp.onchange = async () => {
+    const file = inp.files[0]; if (!file) return;
+    try {
+      const obj = JSON.parse(await file.text());
+      if (obj.app !== 'MiCajaFuerte' || !Array.isArray(obj.items)) throw new Error('formato');
+      if (!(await confirmar(`¿Recuperar la copia del ${fmt(new Date(obj.fecha))} (${obj.items.length} elementos)? Se sustituirán los datos actuales.`, 'Recuperar'))) return;
+      await dbClear(); for (const it of obj.items) await dbPut(it);
+      if (obj.settings) { SET = { ...DEF_SET, ...obj.settings }; saveSet(); }
+      closeTop(); state.member = null; await reload(); toast('Copia recuperada ✓');
+    } catch (e) { toast('Ese archivo no es una copia válida de Mi Caja Fuerte'); }
+  };
+  inp.click();
+}
+$('#setBtn').onclick = abrirAjustes;
+
+/* ============ Arranque ============ */
+(async () => {
+  try { await openDB(); await reload(); }
+  catch (e) { $('#main').innerHTML = `<div class="empty">No se pudo abrir la base de datos.<br>${esc(e && e.message)}</div>`; }
+  const App = Plug('App');
+  if (App) {
+    App.addListener('backButton', () => {
+      if (closeTop()) return;
+      if (state.member) { state.member = null; render(); return; }
+      if (state.tab !== 'inicio') { setTab('inicio'); return; }
+      App.exitApp();
+    });
+    App.addListener('resume', () => render());
+  }
+})();
+</script>
+</body>
+</html>

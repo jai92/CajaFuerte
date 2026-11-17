@@ -1,0 +1,13 @@
+{
+  "appId": "es.micajafuerte.app",
+  "appName": "Mi Caja Fuerte",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#0f766e"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "iconColor": "#0f766e"
+    }
+  }
+}
